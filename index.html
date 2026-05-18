@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>A派科技园 × 钉钉悟空OPC — Demo演示</title>
+<style>
+:root{--primary:#1677ff;--primary-light:#e6f4ff;--accent:#36cfc9;--bg:#f0f2f5;--card:#fff;--text:#1f1f1f;--text2:#666;--text3:#999;--border:#e8e8e8;--shadow:0 2px 12px rgba(0,0,0,0.06);--radius:12px;--nav-w:220px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
+#app{display:flex;height:100vh}
+#sidebar{width:var(--nav-w);background:#001529;color:#fff;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.side-logo{padding:20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.side-logo .logo-icon{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0}
+.side-logo .logo-text{font-size:15px;font-weight:600;line-height:1.3}
+.side-logo .logo-text small{display:block;font-size:11px;opacity:0.6;font-weight:400}
+.nav-section{padding:12px 0}
+.nav-section-title{padding:8px 20px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px}
+.nav-item{padding:10px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.65);transition:all 0.2s;border-left:3px solid transparent}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,0.05)}
+.nav-item.active{color:#fff;background:var(--primary);border-left-color:var(--accent)}
+.nav-item .nav-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.nav-item .nav-badge{margin-left:auto;background:var(--accent);color:#000;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:600}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#topbar{height:52px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;flex-shrink:0}
+#topbar .page-title{font-size:16px;font-weight:600}
+#topbar .user-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
+#topbar .avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+#content{flex:1;overflow-y:auto;padding:24px}
+.card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.card h3{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+.card-row{display:flex;gap:16px;flex-wrap:wrap}
+.card-row .card{flex:1;min-width:240px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
+.kpi-card.accent{border-left-color:var(--accent)}.kpi-card.warn{border-left-color:#ff7a45}.kpi-card.purple{border-left-color:#9254de}
+.kpi-card .kpi-val{font-size:28px;font-weight:700;color:var(--primary)}
+.kpi-card.accent .kpi-val{color:var(--accent)}.kpi-card.warn .kpi-val{color:#ff7a45}.kpi-card.purple .kpi-val{color:#9254de}
+.kpi-card .kpi-label{font-size:13px;color:var(--text2);margin-top:4px}
+.kpi-card .kpi-change{font-size:12px;margin-top:4px}.kpi-card .kpi-change.up{color:#52c41a}
+.banner{background:linear-gradient(135deg,#0a1628,#1a3a5c,#1677ff);border-radius:var(--radius);padding:32px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;top:-30%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(54,207,201,0.2),transparent 70%);border-radius:50%}
+.banner h2{font-size:24px;margin-bottom:8px;position:relative;z-index:1}
+.banner p{font-size:14px;opacity:0.85;position:relative;z-index:1;max-width:500px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#fafafa;padding:10px 12px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);color:var(--text2);font-size:12px}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.data-table tr:hover td{background:var(--primary-light)}
+.status-tag{display:inline-block;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:500}
+.status-tag.active{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.status-tag.pending{background:#fff7e6;color:#fa8c16;border:1px solid #ffd591}
+.status-tag.done{background:#f0f5ff;color:var(--primary);border:1px solid #91caff}
+.chat-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}
+.chat-item:hover{background:var(--primary-light)}
+.chat-item .chat-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
+.chat-item .chat-info{flex:1;min-width:0}
+.chat-item .chat-name{font-size:14px;font-weight:500}
+.chat-item .chat-preview{font-size:12px;color:var(--text3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item .chat-time{font-size:11px;color:var(--text3);flex-shrink:0}
+.chat-item .chat-badge{background:#ff4d4f;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px}
+.ai-chat{padding:20px;max-width:700px;margin:0 auto}
+.ai-msg{margin-bottom:16px;display:flex;gap:10px}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-msg .ai-bubble{max-width:80%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.6}
+.ai-msg.bot .ai-bubble{background:var(--card);box-shadow:var(--shadow);border-bottom-left-radius:4px}
+.ai-msg.user .ai-bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.ai-input-area{display:flex;gap:10px;margin-top:20px;padding:12px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+.ai-input-area input{flex:1;border:none;outline:none;font-size:14px;padding:8px}
+.ai-input-area button{background:var(--primary);color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:14px}
+.scene-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.scene-card{background:var(--card);border-radius:var(--radius);padding:20px 14px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:all 0.3s;border:1px solid transparent}
+.scene-card:hover{border-color:var(--primary);box-shadow:0 4px 20px rgba(22,119,255,0.15);transform:translateY(-2px)}
+.scene-card .scene-icon{font-size:32px;margin-bottom:8px}
+.scene-card .scene-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.scene-card .scene-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:var(--card);border-radius:16px;padding:32px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal h3{font-size:20px;margin-bottom:16px}
+.modal .close-btn{float:right;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text3)}
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border)}
+.tab{padding:10px 20px;cursor:pointer;font-size:14px;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.search-box{width:100%;padding:10px 16px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:16px;outline:none}
+.search-box:focus{border-color:var(--primary)}
+.tag{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:4px;padding:2px 8px;font-size:11px;margin-right:4px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d9d9d9;border-radius:3px}
+@media(max-width:768px){#sidebar{display:none}.kpi-grid{grid-template-columns:repeat(2,1fr)}.scene-grid{grid-template-columns:repeat(2,1fr)}.card-row{flex-direction:column}.card-row .card{min-width:100%}}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="sidebar">
+<div class="side-logo"><div class="logo-icon">A</div><div class="logo-text">A派科技园<small>钉钉悟空OPC</small></div></div>
+<div class="nav-section">
+<div class="nav-section-title">基础协同</div>
+<div class="nav-item active" data-page="workbench"><span class="nav-icon">🏠</span>工作台</div>
+<div class="nav-item" data-page="chat"><span class="nav-icon">💬</span>消息<span class="nav-badge">3</span></div>
+<div class="nav-item" data-page="ai"><span class="nav-icon">🤖</span>A派AI助手</div>
+<div class="nav-item" data-page="approval"><span class="nav-icon">✅</span>OA审批<span class="nav-badge">5</span></div>
+<div class="nav-item" data-page="contacts"><span class="nav-icon">👥</span>通讯录</div>
+<div class="nav-item" data-page="calendar"><span class="nav-icon">📅</span>日程</div>
+<div class="nav-item" data-page="meeting"><span class="nav-icon">🎥</span>会议</div>
+<div class="nav-item" data-page="knowledge"><span class="nav-icon">📚</span>知识库</div>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">园区业务</div>
+<div class="nav-item" data-page="dashboard"><span class="nav-icon">📊</span>管理驾驶舱</div>
+<div class="nav-item" data-page="park-service"><span class="nav-icon">🏗️</span>园区服务</div>
+<div class="nav-item" data-page="opc-scenes"><span class="nav-icon">🚀</span>悟空OPC场景</div>
+<div class="nav-item" data-page="enterprise"><span class="nav-icon">🏢</span>入驻企业管理</div>
+<div class="nav-item" data-page="investment"><span class="nav-icon">💰</span>投融资对接</div>
+</div>
+</div>
+<div id="main">
+<div id="topbar"><div class="page-title" id="pageTitle">🏠 工作台</div><div class="user-info"><span>王思弘</span><div class="avatar">王</div></div></div>
+<div id="content"></div>
+</div>
+</div>
+<script>
+var D = {
+  parkName:'A派科技园', parkFull:'泰菱国际智能科技企业孵化器', group:'港菱机构', chairman:'陈荣', gm:'王思弘', execGm:'黄小京',
+  kpis:[
+    {label:'入驻企业数',val:'47',change:'+12%',up:true,cls:''},
+    {label:'孵化毕业企业',val:'18',change:'+3',up:true,cls:'accent'},
+    {label:'园区入驻率',val:'92.5%',change:'+5.2%',up:true,cls:'warn'},
+    {label:'本月OPC调用',val:'3,286',change:'+156%',up:true,cls:'purple'}
+  ],
+  enterprises:[
+    {name:'广州智冷科技有限公司',industry:'智能制冷设备',since:'2024-03',scale:'15人',status:'active',contact:'张明',opc:['一人制造','一人财务']},
+    {name:'绿洲环境技术有限公司',industry:'环保制冷剂',since:'2024-06',scale:'22人',status:'active',contact:'李华',opc:['一人电商','一人跨境']},
+    {name:'极光智能家电',industry:'智能家居',since:'2024-09',scale:'8人',status:'active',contact:'陈芳',opc:['一人门店','一人设计']},
+    {name:'星云机器人',industry:'服务机器人',since:'2025-01',scale:'30人',status:'active',contact:'刘强',opc:['一人开发','一人猎头']},
+    {name:'微芯半导体',industry:'制冷芯片',since:'2025-03',scale:'12人',status:'active',contact:'赵敏',opc:['一人制造','一人法务']},
+    {name:'蓝海跨境电商',industry:'制冷设备出口',since:'2025-04',scale:'6人',status:'active',contact:'周磊',opc:['一人跨境','一人电商']},
+    {name:'创想内容工作室',industry:'新媒体',since:'2025-06',scale:'4人',status:'active',contact:'吴婷',opc:['一人知识博主','一人设计']},
+    {name:'锐思财务咨询',industry:'企业服务',since:'2025-07',scale:'5人',status:'active',contact:'孙伟',opc:['一人财务']},
+    {name:'天工精密制造',industry:'压缩机配件',since:'2025-09',scale:'40人',status:'pending',contact:'马超',opc:['一人制造']},
+    {name:'橙子智能科技',industry:'IoT传感器',since:'2025-11',scale:'10人',status:'pending',contact:'林悦',opc:['一人开发','一人猎头']}
+  ],
+  approvals:[
+    {title:'入驻申请-天工精密制造',applicant:'马超',dept:'招商部',time:'2026-05-18',status:'pending',type:'入驻审批'},
+    {title:'绿洲环境-场地扩租申请',applicant:'李华',dept:'运营部',time:'2026-05-17',status:'pending',type:'空间审批'},
+    {title:'极光智能-政策补贴申报',applicant:'陈芳',dept:'企业服务部',time:'2026-05-16',status:'done',type:'政策审批'},
+    {title:'星云机器人-融资对接申请',applicant:'刘强',dept:'投融资部',time:'2026-05-15',status:'done',type:'融资审批'},
+    {title:'微芯半导体-实验室使用申请',applicant:'赵敏',dept:'运营部',time:'2026-05-14',status:'active',type:'资源审批'},
+    {title:'蓝海跨境-海外考察申请',applicant:'周磊',dept:'国际部',time:'2026-05-13',status:'active',type:'出行审批'},
+    {title:'创想内容-园区活动场地申请',applicant:'吴婷',dept:'运营部',time:'2026-05-12',status:'done',type:'资源审批'},
+    {title:'锐思财务-园区企业服务签约',applicant:'孙伟',dept:'企业服务部',time:'2026-05-11',status:'done',type:'合同审批'}
+  ],
+  events:[
+    {title:'港菱机构战略合作洽谈会',time:'2026-05-19 09:00-11:00',location:'A派科技园3F会议室',type:'meeting'},
+    {title:'园区企业OPC场景培训（第一期）',time:'2026-05-20 14:00-17:00',location:'多功能厅',type:'training'},
+    {title:'中欧合作示范园区年度评审',time:'2026-05-22 10:00-12:00',location:'线上会议',type:'review'},
+    {title:'入驻企业月度座谈会',time:'2026-05-23 15:00-16:30',location:'创客咖啡',type:'meeting'},
+    {title:'制冷产业链供需对接会',time:'2026-05-25 09:00-17:00',location:'广州科学城会议中心',type:'event'}
+  ],
+  meetings:[
+    {title:'悟空OPC场景落地推进会',time:'2026-05-19 14:00',room:'3F-A会议室',attendees:'王思弘、张睿、赵道明',status:'upcoming'},
+    {title:'园区招商策略复盘',time:'2026-05-20 10:00',room:'2F-B会议室',attendees:'招商部全员',status:'upcoming'},
+    {title:'港菱集团月度经营会',time:'2026-05-21 09:00',room:'集团总部',attendees:'陈荣、黄小京、各事业部负责人',status:'upcoming'},
+    {title:'入驻企业投融资路演',time:'2026-05-24 14:00',room:'多功能厅',attendees:'6家投资机构、8家入驻企业',status:'upcoming'},
+    {title:'园区智能化改造方案评审',time:'2026-05-26 10:00',room:'3F-C会议室',attendees:'运营部、技术部',status:'upcoming'}
+  ],
+  contacts:[
+    {name:'陈荣',title:'港菱机构董事长',dept:'集团',phone:'138****8888'},
+    {name:'黄小京',title:'广东泰菱执行总经理',dept:'泰菱制冷',phone:'139****6666'},
+    {name:'王思弘',title:'A派科技园总经理',dept:'园区管理',phone:'136****9999'},
+    {name:'张睿',title:'运营总监',dept:'园区运营',phone:'135****7777'},
+    {name:'赵道明',title:'招商经理',dept:'招商部',phone:'137****5555'},
+    {name:'李明慧',title:'企业服务主管',dept:'企业服务部',phone:'133****4444'},
+    {name:'陈志远',title:'投融资经理',dept:'投融资部',phone:'132****3333'},
+    {name:'刘芳',title:'物业经理',dept:'物业管理',phone:'131****2222'},
+    {name:'吴忠',title:'渠道总监',dept:'泰菱制冷',phone:'130****1111'},
+    {name:'邱伟雄',title:'技术经理',dept:'泰菱制冷',phone:'134****0000'}
+  ],
+  docs:[
+    {title:'A派科技园入驻指南 v3.0',cat:'园区制度',time:'2026-04-15',author:'运营部'},
+    {title:'广州市孵化器政策汇编 2026',cat:'政策文件',time:'2026-03-20',author:'企业服务部'},
+    {title:'钉钉悟空OPC操作手册',cat:'培训资料',time:'2026-05-10',author:'钉钉团队'},
+    {title:'制冷产业链数字化转型白皮书',cat:'行业报告',time:'2026-02-28',author:'港菱研究院'},
+    {title:'中欧合作示范园区年度报告',cat:'园区报告',time:'2026-01-15',author:'园区管理'},
+    {title:'入驻企业融资指南',cat:'投融资',time:'2026-04-01',author:'投融资部'},
+    {title:'园区智能化改造技术方案',cat:'技术方案',time:'2026-05-05',author:'技术部'},
+    {title:'悟空OPC场景落地案例集',cat:'培训资料',time:'2026-05-12',author:'钉钉团队'}
+  ],
+  chats:[
+    {name:'陈荣',avatar:'陈',color:'#1677ff',preview:'思弘，悟空OPC方案的Demo我看过了，效果不错。下周约个时间详细聊一下落地计划。',time:'10:32',badge:1},
+    {name:'黄小京',avatar:'黄',color:'#36cfc9',preview:'收到，制冷产业链的企业名单我已经整理好了，共23家上下游企业。',time:'09:15',badge:0},
+    {name:'张睿',avatar:'张',color:'#ff7a45',preview:'今天的园区企业OPC培训报名已经满员了，是否需要增加场次？',time:'昨天',badge:2},
+    {name:'园区运营群',avatar:'群',color:'#9254de',preview:'赵道明：新一批入驻企业审核结果已出，请各位查收。',time:'昨天',badge:0},
+    {name:'制冷产业链协作群',avatar:'链',color:'#597ef7',preview:'邱伟雄：松下CO2压缩机技术资料已上传知识库，欢迎大家查阅。',time:'周一',badge:0}
+  ],
+  opcScenes:[
+    {icon:'🏪',name:'一人门店运营',desc:'竞品分析·自动发帖·智能回复·7×24在线运营',target:'零售/服务类入驻企业'},
+    {icon:'🛒',name:'一人电商团队',desc:'1688选品·供应商查询·自动上架·经营分析·主图优化',target:'电商类入驻企业'},
+    {icon:'🌍',name:'一人跨境电商',desc:'亚马逊热搜·1688同款·供应商沟通·商品图视频生成',target:'外贸类入驻企业'},
+    {icon:'🎯',name:'一人猎头',desc:'岗位分析·人才库匹配·候选人报告生成',target:'所有入驻企业'},
+    {icon:'💻',name:'一人开发团队',desc:'一句话生成应用/系统·零代码搭建数字化工具',target:'科技类入驻企业'},
+    {icon:'💰',name:'一人财务',desc:'一句话开票·AI凭证·现金日报自动推送',target:'所有入驻企业'},
+    {icon:'🎬',name:'一人知识博主',desc:'选题雷达·爆款拆解·动画大师·内容创业加速',target:'文创/内容类入驻企业'},
+    {icon:'🏭',name:'一人制造团队',desc:'BOM拆解·项目管理·进度追踪·风险预警·经验沉淀',target:'制造类入驻企业'},
+    {icon:'📋',name:'一人法务',desc:'合同智能审查·法规检索·法律风险防控',target:'所有入驻企业'},
+    {icon:'🎨',name:'一人设计团队',desc:'品牌VI·海报设计·商品视频·设计需求即时响应',target:'品牌/设计类入驻企业'}
+  ],
+  parkServices:[
+    {icon:'📋',name:'工商注册',desc:'一站式工商代办，快速完成企业注册',status:'active'},
+    {icon:'💰',name:'投融资对接',desc:'链接6+投资机构，助力企业融资',status:'active'},
+    {icon:'🔗',name:'资源链接',desc:'制冷产业链上下游资源精准匹配',status:'active'},
+    {icon:'📦',name:'供应链整合',desc:'集中采购降本，物流仓储共享',status:'active'},
+    {icon:'🏛️',name:'政策对接',desc:'政府补贴申报、税收优惠辅导',status:'active'},
+    {icon:'🔬',name:'实验室共享',desc:'制冷设备测试实验室开放使用',status:'active'},
+    {icon:'📚',name:'创业辅导',desc:'创业导师一对一辅导',status:'active'},
+    {icon:'🌐',name:'国际合作',desc:'中欧技术转移、海外市场拓展',status:'active'}
+  ],
+  investments:[
+    {company:'极光智能家电',round:'Pre-A',amount:'500万',investor:'六脉金服',stage:'尽调中',date:'2026-05'},
+    {company:'星云机器人',round:'A轮',amount:'2000万',investor:'中创集团',stage:'已签约',date:'2026-04'},
+    {company:'微芯半导体',round:'天使轮',amount:'300万',investor:'华工风投',stage:'洽谈中',date:'2026-05'},
+    {company:'绿洲环境',round:'A+轮',amount:'1500万',investor:'广东独联体技术联盟',stage:'TS签署',date:'2026-03'},
+    {company:'天工精密',round:'天使轮',amount:'200万',investor:'待定',stage:'BP准备',date:'2026-05'}
+  ]
+};
+
+var currentPage = 'workbench';
+var modalData = null;
+var aiMessages = [
+  {type:'bot',text:'你好！我是<b>A派AI助手</b>，基于钉钉悟空OPC能力，我可以帮你：<br><br>🏪 <b>一人门店</b> — 竞品分析、自动运营<br>🛒 <b>一人电商</b> — 选品上架、经营分析<br>🌍 <b>一人跨境</b> — 亚马逊/1688联动<br>🎯 <b>一人猎头</b> — 智能招聘匹配<br>💻 <b>一人开发</b> — 快速搭建应用<br>💰 <b>一人财务</b> — 开票凭证自动化<br><br>试试问我：<br>· "帮我分析一下园区入驻企业的行业分布"<br>· "制冷产业链有哪些融资机会？"<br>· "帮我生成一份企业入驻指南"'}
+];
+
+function statusTag(s){var m={active:'进行中',pending:'待审核',done:'已完成',upcoming:'即将开始'};return '<span class="status-tag '+s+'">'+(m[s]||s)+'</span>';}
+function showModal(title,body){modalData={title:title,body:body};renderModal();}
+function closeModal(){modalData=null;var o=document.getElementById('modalOverlay');if(o)o.remove();}
+function renderModal(){var o=document.getElementById('modalOverlay');if(o)o.remove();if(!modalData)return;
+  var d=document.createElement('div');d.className='modal-overlay';d.id='modalOverlay';d.onclick=function(e){if(e.target===this)closeModal();};
+  var m=document.createElement('div');m.className='modal';
+  var btn=document.createElement('button');btn.className='close-btn';btn.textContent='\u00d7';btn.onclick=closeModal;m.appendChild(btn);
+  var h3=document.createElement('h3');h3.textContent=modalData.title;m.appendChild(h3);
+  var bd=document.createElement('div');bd.innerHTML=modalData.body;m.appendChild(bd);
+  d.appendChild(m);document.body.appendChild(d);
+}
+
+function renderApp(){
+  document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+  var navEl = document.querySelector('[data-page="'+currentPage+'"]');
+  if(navEl) navEl.classList.add('active');
+  var titleMap = {
+    workbench:'\U0001f3e0 工作台', chat:'\U0001f4ac 消息', ai:'\U0001f916 A派AI助手', approval:'\u2705 OA审批',
+    contacts:'\U0001f465 通讯录', calendar:'\U0001f4c5 日程', meeting:'\U0001f3a5 会议', knowledge:'\U0001f4da 知识库',
+    dashboard:'\U0001f4ca 管理驾驶舱', 'park-service':'\U0001f3d7\ufe0f 园区服务', 'opc-scenes':'\U0001f680 悟空OPC场景',
+    enterprise:'\U0001f3e2 入驻企业管理', investment:'\U0001f4b0 投融资对接'
+  };
+  document.getElementById('pageTitle').textContent = titleMap[currentPage] || currentPage;
+  var content = document.getElementById('content');
+  var fn = window['render_'+currentPage.replace(/-/g,'_')];
+  if(fn) fn(content);
+}
+
+function render_workbench(el){
+  el.innerHTML = '<div class="banner"><h2>欢迎回到A派科技园智能管理平台</h2><p>港菱机构 \u00d7 钉钉悟空OPC \u2014 以AI赋能制冷产业链上下游企业，打造\u300cAI+园区\u300d双引擎驱动的创新创业生态。</p></div>'+
+    '<div class="kpi-grid">'+D.kpis.map(function(k){return '<div class="kpi-card '+k.cls+'"><div class="kpi-val">'+k.val+'</div><div class="kpi-label">'+k.label+'</div><div class="kpi-change '+(k.up?'up':'')+'">'+k.change+' \u2191</div></div>';}).join('')+'</div>'+
+    '<div class="card-row"><div class="card" style="flex:2;"><h3><span class="dot"></span>今日日程</h3>'+D.events.slice(0,3).map(function(e){return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><strong>'+e.title+'</strong><br><span style="color:var(--text3);">'+e.time+' \u00b7 '+e.location+'</span></div>';}).join('')+'</div>'+
+    '<div class="card" style="flex:1;"><h3><span class="dot"></span>待办事项</h3>'+
+    [{t:'审核天工精密入驻申请',p:'高'},{t:'准备港菱战略合作洽谈材料',p:'高'},{t:'确认OPC培训场地和设备',p:'中'},{t:'提交中欧示范园区评审材料',p:'高'},{t:'跟进极光智能融资尽调进度',p:'中'}].map(function(t){return '<div style="padding:6px 0;font-size:13px;display:flex;justify-content:space-between;"><span>'+t.t+'</span><span style="color:'+(t.p==='高'?'#ff4d4f':'#fa8c16')+';font-size:11px;">'+t.p+'</span></div>';}).join('')+'</div></div>'+
+    '<div class="card"><h3><span class="dot"></span>园区动态</h3>'+
+    [{t:'港菱机构2024年全国渠道服务商会议圆满召开',src:'产业在线',d:'2024-03-15',s:'港菱机构董事长陈荣发表重要讲话，宣布从配件商向解决方案提供商战略转型。'},
+     {t:'热烈祝贺中国银行开发区分行乔迁至A派科技园',src:'羊城网',d:'2024-05-26',s:'黄埔区政府领导、中国银行省分行领导、泰菱孵化器董事长等嘉宾出席迁址开业活动。'},
+     {t:'港菱机构陈荣董事长率团访问日本松下电器',src:'产业在线',d:'2024-03-27',s:'陈荣董事长与松下\u00b7万宝中村秀司总经理带领客户代表团参访松下产品展示厅和研发实验室。'}].map(function(n){return '<div style="padding:10px 0;border-bottom:1px solid var(--border);"><div style="font-size:14px;font-weight:500;">'+n.t+'</div><div style="font-size:12px;color:var(--text3);margin-top:4px;">'+n.s+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">'+n.src+' \u00b7 '+n.d+'</div></div>';}).join('')+'</div>';
+}
+
+function render_chat(el){
+  el.innerHTML = '<div class="card" style="padding:0;">'+D.chats.map(function(c){var p=c.preview.replace(/'/g,"\\'");return '<div class="chat-item" onclick="showModal(\''+c.name+'\',\'<p>'+p+'</p><p style=margin-top:12px;color:var(--text3)>'+c.time+'</p>\')"><div class="chat-avatar" style="background:'+c.color+';">'+c.avatar+'</div><div class="chat-info"><div class="chat-name">'+c.name+'</div><div class="chat-preview">'+c.preview+'</div></div><div class="chat-time">'+c.time+'</div>'+(c.badge?'<div class="chat-badge">'+c.badge+'</div>':'')+'</div>';}).join('')+'</div>';
+}
+
+function render_ai(el){
+  el.innerHTML = '<div class="ai-chat" id="aiChatContainer">'+aiMessages.map(function(m){return '<div class="ai-msg '+m.type+'"><div class="ai-bubble">'+m.text+'</div></div>';}).join('')+
+    '<div class="ai-input-area"><input id="aiInput" placeholder="输入你的问题，试试OPC场景..." onkeydown="if(event.key===\'Enter\')sendAI();"><button onclick="sendAI()">发送</button></div></div>';
+}
+function sendAI(){
+  var inp = document.getElementById('aiInput');
+  if(!inp || !inp.value.trim()) return;
+  var q = inp.value.trim();
+  inp.value = '';
+  aiMessages.push({type:'user',text:q});
+  var r = '';
+  var ql = q.toLowerCase();
+  if(ql.indexOf('行业')>=0||ql.indexOf('分布')>=0){
+    r='根据园区数据，当前入驻企业行业分布如下：<br><br>\uD83D\uDD27 <b>制冷/暖通设备</b> \u2014 35%（16家）<br>\uD83E\uDD16 <b>智能科技/机器人</b> \u2014 22%（10家）<br>\uD83C\uDF10 <b>跨境电商/外贸</b> \u2014 15%（7家）<br>\uD83D\uDCF1 <b>新媒体/内容</b> \u2014 10%（5家）<br>\uD83D\uDCB0 <b>企业服务/金融</b> \u2014 10%（5家）<br>\uD83C\uDFED <b>精密制造</b> \u2014 8%（4家）<br><br>制冷产业链相关企业占比最高，与港菱机构产业优势高度匹配。';
+  }else if(ql.indexOf('融资')>=0||ql.indexOf('投资')>=0){
+    r='当前园区投融资对接情况：<br><br>\uD83D\uDCCA <b>在谈项目</b>：5个<br>\uD83D\uDCB0 <b>累计对接金额</b>：4,500万元<br>\uD83C\uDFE6 <b>合作投资机构</b>：六脉金服、中创集团、华工风投、广东独联体技术联盟等6家<br><br>热点领域：<br>\u00b7 智能制冷设备（Pre-A轮，500万）<br>\u00b7 服务机器人（A轮，2000万）<br>\u00b7 制冷芯片（天使轮，300万）<br><br>需要我帮你对接哪家投资机构？';
+  }else if(ql.indexOf('入驻')>=0||ql.indexOf('指南')>=0){
+    r='A派科技园入驻流程（AI加速版）：<br><br>\uD83D\uDCCB <b>Step 1</b>：提交入驻申请（OA审批自动流转）<br>\uD83D\uDD0D <b>Step 2</b>：AI自动匹配园区服务和资源<br>\uD83D\uDCDD <b>Step 3</b>：签署入驻协议（法务AI审查）<br>\uD83D\uDE80 <b>Step 4</b>：开通钉钉悟空OPC账号<br>\uD83C\uDF93 <b>Step 5</b>：参加OPC场景培训<br><br>全程最快3个工作日完成！需要我帮你生成入驻材料吗？';
+  }else if(ql.indexOf('opc')>=0||ql.indexOf('场景')>=0||ql.indexOf('悟空')>=0){
+    r='悟空10大OPC场景已全面接入A派科技园：<br><br>\uD83C\uDFEA 一人门店 | \uD83D\uDED2 一人电商 | \uD83C\uDF0D 一人跨境<br>\uD83C\uDFAF 一人猎头 | \uD83D\uDCBB 一人开发 | \uD83D\uDCB0 一人财务<br>\uD83C\uDFAC 一人知识博主 | \uD83C\uDFED 一人制造<br>\uD83D\uDCCB 一人法务 | \uD83C\uDFA8 一人设计<br><br>入驻企业可根据自身需求选择1-N个场景组合使用。本月已有<b>32家</b>企业使用OPC场景，累计调用<b>3,286次</b>。你想了解哪个场景的详细信息？';
+  }else{
+    r='收到你的问题：\u300C'+q+'\u300D<br><br>作为A派AI助手，我可以帮你：<br>\u00b7 查询园区企业数据和行业分析<br>\u00b7 对接投融资资源<br>\u00b7 推荐适合的悟空OPC场景<br>\u00b7 解答入驻流程和政策问题<br>\u00b7 协调园区服务资源<br><br>请告诉我更具体的需求，我来帮你处理！';
+  }
+  setTimeout(function(){
+    aiMessages.push({type:'bot',text:r});
+    var c = document.getElementById('aiChatContainer');
+    if(c){
+      c.innerHTML = aiMessages.map(function(m){return '<div class="ai-msg '+m.type+'"><div class="ai-bubble">'+m.text+'</div></div>';}).join('');
+      c.scrollTop = c.scrollHeight;
+    }
+  },600);
+}
+
+function render_approval(el){
+  el.innerHTML = '<input class="search-box" placeholder="搜索审批...">'+
+    '<div class="tabs"><div class="tab active" onclick="filterApproval(\'all\',this)">全部</div><div class="tab" onclick="filterApproval(\'pending\',this)">待审批</div><div class="tab" onclick="filterApproval(\'active\',this)">进行中</div><div class="tab" onclick="filterApproval(\'done\',this)">已完成</div></div>'+
+    '<div class="card" style="padding:0;"><table class="data-table"><thead><tr><th>审批标题</th><th>申请人</th><th>部门</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="approvalTbody"></tbody></table></div>';
+  filterApproval('all');
+}
+function filterApproval(f,tabEl){
+  if(tabEl){document.querySelectorAll('#content .tab').forEach(function(t){t.classList.remove('active');});tabEl.classList.add('active');}
+  var list = f==='all'?D.approvals:D.approvals.filter(function(a){return a.status===f;});
+  var tb = document.getElementById('approvalTbody');
+  if(tb) tb.innerHTML = list.map(function(a){return '<tr><td>'+a.title+'</td><td>'+a.applicant+'</td><td>'+a.dept+'</td><td>'+a.time+'</td><td>'+statusTag(a.status)+'</td><td><a href="#" style="color:var(--primary);" onclick="showModal(\'审批详情\',\'<p><b>标题：</b>'+a.title+'</p><p><b>申请人：</b>'+a.applicant+'</p><p><b>部门：</b>'+a.dept+'</p><p><b>类型：</b>'+a.type+'</p><p><b>时间：</b>'+a.time+'</p><p><b>状态：</b>'+statusTag(a.status)+'</p>\');return false;">查看</a></td></tr>';}).join('');
+}
+
+function render_contacts(el){
+  el.innerHTML = '<input class="search-box" placeholder="搜索同事...">'+
+    '<div class="card" style="padding:0;"><table class="data-table"><thead><tr><th>姓名</th><th>职务</th><th>部门</th><th>电话</th></tr></thead><tbody>'+D.contacts.map(function(c){return '<tr><td><strong>'+c.name+'</strong></td><td>'+c.title+'</td><td>'+c.dept+'</td><td>'+c.phone+'</td></tr>';}).join('')+'</tbody></table></div>';
+}
+
+function render_calendar(el){
+  el.innerHTML = '<div class="card"><h3><span class="dot"></span>近期日程</h3>'+D.events.map(function(e){var t={meeting:'\uD83D\uDCC5 会议',training:'\uD83D\uDCDA 培训',review:'\uD83D\uDCCB 评审',event:'\uD83C\uDF89 活动'};return '<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;"><div><strong>'+e.title+'</strong><br><span style="color:var(--text3);font-size:12px;">'+e.time+' \u00b7 '+e.location+'</span></div><span style="font-size:11px;color:var(--text3);">'+(t[e.type]||'')+'</span></div>';}).join('')+'</div>';
+}
+
+function render_meeting(el){
+  el.innerHTML = '<div class="card" style="padding:0;"><table class="data-table"><thead><tr><th>会议主题</th><th>时间</th><th>地点</th><th>参会人</th><th>状态</th></tr></thead><tbody>'+D.meetings.map(function(m){return '<tr><td><strong>'+m.title+'</strong></td><td>'+m.time+'</td><td>'+m.room+'</td><td>'+m.attendees+'</td><td>'+statusTag(m.status)+'</td></tr>';}).join('')+'</tbody></table></div>';
+}
+
+function render_knowledge(el){
+  el.innerHTML = '<input class="search-box" placeholder="搜索文档...">'+
+    '<div class="card" style="padding:0;"><table class="data-table"><thead><tr><th>文档名称</th><th>分类</th><th>更新时间</th><th>作者</th></tr></thead><tbody>'+D.docs.map(function(d){return '<tr><td><strong>'+d.title+'</strong></td><td><span class="tag">'+d.cat+'</span></td><td>'+d.time+'</td><td>'+d.author+'</td></tr>';}).join('')+'</tbody></table></div>';
+}
+
+function render_dashboard(el){
+  el.innerHTML = '<div class="kpi-grid">'+D.kpis.map(function(k){return '<div class="kpi-card '+k.cls+'"><div class="kpi-val">'+k.val+'</div><div class="kpi-label">'+k.label+'</div><div class="kpi-change '+(k.up?'up':'')+'">'+k.change+' \u2191</div></div>';}).join('')+'</div>'+
+    '<div class="card-row"><div class="card" style="flex:1;"><h3><span class="dot"></span>入驻企业行业分布</h3><div style="padding:10px;">'+
+    [{n:'制冷/暖通设备',v:35,c:'#1677ff'},{n:'智能科技/机器人',v:22,c:'#36cfc9'},{n:'跨境电商/外贸',v:15,c:'#ff7a45'},{n:'新媒体/内容',v:10,c:'#9254de'},{n:'企业服务/金融',v:10,c:'#597ef7'},{n:'精密制造',v:8,c:'#ffc53d'}].map(function(x){return '<div style="display:flex;align-items:center;margin:8px 0;"><span style="width:80px;font-size:12px;">'+x.n+'</span><div style="flex:1;height:20px;background:#f0f0f0;border-radius:4px;overflow:hidden;"><div style="height:100%;width:'+x.v+'%;background:'+x.c+';border-radius:4px;"></div></div><span style="width:40px;text-align:right;font-size:12px;font-weight:600;">'+x.v+'%</span></div>';}).join('')+'</div></div>'+
+    '<div class="card" style="flex:1;"><h3><span class="dot"></span>OPC场景使用排行</h3><div style="padding:10px;">'+
+    [{n:'一人财务',v:85},{n:'一人猎头',v:72},{n:'一人制造',v:65},{n:'一人电商',v:58},{n:'一人门店',v:45},{n:'一人跨境',v:38}].map(function(x){return '<div style="display:flex;align-items:center;margin:8px 0;"><span style="width:80px;font-size:12px;">'+x.n+'</span><div style="flex:1;height:20px;background:#f0f0f0;border-radius:4px;overflow:hidden;"><div style="height:100%;width:'+x.v+'%;background:linear-gradient(90deg,#1677ff,#36cfc9);border-radius:4px;"></div></div><span style="width:40px;text-align:right;font-size:12px;font-weight:600;">'+x.v+'%</span></div>';}).join('')+'</div></div></div>';
+}
+
+function render_park_service(el){
+  el.innerHTML = '<div class="scene-grid" style="grid-template-columns:repeat(4,1fr);">'+D.parkServices.map(function(s){return '<div class="scene-card" onclick="showModal(\''+s.name+'\',\'<p><b>服务名称：</b>'+s.name+'</p><p><b>描述：</b>'+s.desc+'</p><p><b>状态：</b>'+statusTag(s.status)+'</p><p style=margin-top:12px;>该服务已接入钉钉悟空OPC平台，入驻企业可通过A派AI助手一键申请。</p>\')"><div class="scene-icon">'+s.icon+'</div><div class="scene-name">'+s.name+'</div><div class="scene-desc">'+s.desc+'</div></div>';}).join('')+'</div>';
+}
+
+function render_opc_scenes(el){
+  el.innerHTML = '<div class="scene-grid">'+D.opcScenes.map(function(s){return '<div class="scene-card" onclick="showModal(\''+s.name+'\',\'<h4>'+s.icon+' '+s.name+'</h4><p><b>能力描述：</b>'+s.desc+'</p><p><b>适用对象：</b>'+s.target+'</p><p style=margin-top:12px;color:var(--text2);>该场景已接入A派科技园钉钉悟空OPC平台，入驻企业可直接在A派AI助手中激活使用。</p>\')"><div class="scene-icon">'+s.icon+'</div><div class="scene-name">'+s.name+'</div><div class="scene-desc">'+s.desc+'</div></div>';}).join('')+'</div>';
+}
+
+function render_enterprise(el){
+  el.innerHTML = '<input class="search-box" placeholder="搜索入驻企业...">'+
+    '<div class="card" style="padding:0;"><table class="data-table"><thead><tr><th>企业名称</th><th>行业</th><th>入驻时间</th><th>规模</th><th>状态</th><th>OPC场景</th><th>操作</th></tr></thead><tbody>'+D.enterprises.map(function(e){return '<tr><td><strong>'+e.name+'</strong></td><td>'+e.industry+'</td><td>'+e.since+'</td><td>'+e.scale+'</td><td>'+statusTag(e.status)+'</td><td>'+e.opc.map(function(o){return '<span class="tag">'+o+'</span>';}).join('')+'</td><td><a href="#" style="color:var(--primary);" onclick="showModal(\''+e.name+'\',\'<p><b>企业名称：</b>'+e.name+'</p><p><b>行业：</b>'+e.industry+'</p><p><b>入驻时间：</b>'+e.since+'</p><p><b>规模：</b>'+e.scale+'</p><p><b>联系人：</b>'+e.contact+'</p><p><b>状态：</b>'+statusTag(e.status)+'</p><p><b>OPC场景：</b>'+e.opc.join('\u3001')+'</p>\');return false;">详情</a></td></tr>';}).join('')+'</tbody></table></div>';
+}
+
+function render_investment(el){
+  el.innerHTML = '<div class="card" style="padding:0;"><table class="data-table"><thead><tr><th>企业</th><th>轮次</th><th>金额</th><th>投资方</th><th>阶段</th><th>时间</th></tr></thead><tbody>'+D.investments.map(function(i){return '<tr><td><strong>'+i.company+'</strong></td><td>'+i.round+'</td><td>'+i.amount+'</td><td>'+i.investor+'</td><td>'+i.stage+'</td><td>'+i.date+'</td></tr>';}).join('')+'</tbody></table></div>';
+}
+
+// Init
+document.querySelectorAll('.nav-item').forEach(function(el){
+  el.addEventListener('click',function(){
+    currentPage = this.getAttribute('data-page');
+    renderApp();
+  });
+});
+renderApp();
+</script>
+</body>
+</html>
